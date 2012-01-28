@@ -3,7 +3,7 @@
  * User: skovmand
  * Date: 28/01/12
  * Time: 12.10
- * My simple calculator!
+ * My simple calculator! Now on GITHUB!
  */
 
 import java.math.BigDecimal;
