@@ -8,7 +8,5 @@ Usage "java SimpleCalc [add/subtract/divide/multiply] number1 number2
 
 Second submission - No changes, just a GITHUB-test.
 
-Version 1.01:
+Version 1.00:
 - added this file - README.txt
-- New argument usage: "java SimpleCalc number1 [+-/*] number2"
-
