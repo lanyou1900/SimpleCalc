@@ -10,3 +10,7 @@ Second submission - No changes, just a GITHUB-test.
 
 Version 1.00:
 - added this file - README.txt
+
+Version 1.01:
+- new usage: "java SimpleCalc number1 (+-*/) number2. You might have to use \* instead of *.
+- new structure in the code.
