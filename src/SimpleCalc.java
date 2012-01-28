@@ -56,7 +56,7 @@ public class SimpleCalc {
 
     public static void main( String args[] ) {
 
-        System.out.println("SimpleCalc - The simple calculator.");
+        System.out.println("SimpleCalc - The simple calculator - v1.01");
 
         // Check arguments
         int modeofoperation = checkArguments(args);
