@@ -9,7 +9,8 @@ import java.math.BigDecimal;
 
 public class SimpleCalc {
     
-    public static String versionNumber = new String("SimpleCalc - The simple calculator - v1.01");
+    // Initialise public version number and usage info.
+    public static String welcomeMsg = new String("SimpleCalc - The simple calculator - v1.02");
     public static String usage = new String("Usage: SimpleCalc number1 [+-*/] number2. To multiply, use \\* instead of *.");
 
     // Initialise variables to be used in calculations.
@@ -28,8 +29,11 @@ public class SimpleCalc {
     }
 
     private static int initialiseModeOfOperation(String[] args) {
-        // The first and third argument should be a number, the second a single char.
+        // Check for arguments.
+        if (args.length < 3)
+            fatalError("No arguments given.", 1);
 
+        // The first and third argument should be a number, the second a single char.
         // What is the mode of operation?
         int modeofoperation = 0;
 
@@ -53,21 +57,14 @@ public class SimpleCalc {
         // Are the two numbers actually numbers?
         // Initialise the two numbers into number1bd and number2bd:
 
-        try {
-            // Initialise number1bd and number2bd from args[0] and args[2].
-            number1bd = toBigDecimal(args[0]);
-            number2bd = toBigDecimal(args[2]);
+        // Initialise number1bd and number2bd from args[0] and args[2].
+        number1bd = toBigDecimal(args[0]);
+        number2bd = toBigDecimal(args[2]);
 
-        } catch (NumberFormatException e) {
-            fatalError("Invalid number supplied. Must be a numeric value. Use '.' for decimals.", 2);
-        }
-
-        
         // Strip trailing zeros from numbers:
         number1bd = number1bd.stripTrailingZeros();
         number2bd = number2bd.stripTrailingZeros();
-        
-        
+
         // Create plain text versions of BigDecimals
         number1s = number1bd.toPlainString();
         number2s = number2bd.toPlainString();
@@ -75,13 +72,21 @@ public class SimpleCalc {
     }
 
     private static BigDecimal toBigDecimal(String num) throws NumberFormatException {
-        // Returns a BigDecimal from a String or throws NumberFormatException.
+        // Returns a BigDecimal from a String or handles a NumberFormatException.
 
-        BigDecimal numbd = new BigDecimal(num);
+        BigDecimal numbd = new BigDecimal(0);
+
+        try {
+            numbd = new BigDecimal(num);
+        } catch (NumberFormatException e) {
+            fatalError("Invalid number '" + num + "'. Must be a numeric value. Use '.' for decimals.", 2);
+        }
+
         return numbd;
     }
 
 
+    // Functions for doing basic calculations:
     private static String addTwoNumbers(BigDecimal num1, BigDecimal num2) {
         BigDecimal result = num1.add(num2);
         result = result.stripTrailingZeros();
@@ -109,7 +114,7 @@ public class SimpleCalc {
 
     public static void main(String args[]) {
 
-        System.out.println(versionNumber);
+        System.out.println(welcomeMsg);
         
         // Get mode of operation and numbers from command line.
         int modeofoperation = initialiseModeOfOperation(args);
