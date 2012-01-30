@@ -7,6 +7,10 @@ You might have to use \* instead of * because the Terminal interprets * as a wil
 
 Changelog:
 
+Version 1.03:
+- better source code - simplified by Daniel
+- same functionality
+
 Version 1.02:
 - fixed basic bug (crashed when no args was used)
 - better error handling when numbers are invalid.
