@@ -3,7 +3,7 @@ import java.math.BigDecimal;
 public class SimpleCalc {
     
     // Initialise public version number and usage info.
-    public static String welcomeMsg = "SimpleCalc - The simple calculator - v1.1";
+    public static String welcomeMsg = "SimpleCalc - The simple calculator - v1.11";
     public static String usage = "Usage: SimpleCalc [math expression] (precision). Use only +, -, * and /.";
 
     // Default Precision Variable
@@ -80,73 +80,22 @@ public class SimpleCalc {
             replacedPlusMinusString = input.replaceAll("-","+-");
         }
 
+        // Check if some division and multiplication have been replaced wrongly - f.x. "2/-2" -> "2/+-2" or "2*-2" -> "2*+-2"
+        replacedPlusMinusString = replacedPlusMinusString.replaceAll("/\\+","/");
+        replacedPlusMinusString = replacedPlusMinusString.replaceAll("\\*\\+","*");
+
         // Split string at '+'
         return replacedPlusMinusString.split("\\+");
     }
-    
-    private static String [] splitStringAtMultiplicationDivisionSigns(String input) {
 
-        // Replace the "/" with "*1/" - to turn the division into multiplication.
-        String replacedMultiplicationDivisionString = input.replaceAll("/","*1/");
+    private static String [] splitStringAtMultiplicationSigns(String input) {
 
         // Split the string at "*"
-        return replacedMultiplicationDivisionString.split("\\*");
-    }
-
-    private static String calculateNumericValue (String input) {
-        // Try to calculate the numeric value of the input string.
-        // For now, assume that it contains only multiplication and division.
-
-        // Replace the "/" with "*1/" - to turn the division into multiplication.
-        // Split the string at "*"
-        String [] splitArrayAtStar = splitStringAtMultiplicationDivisionSigns(input);
-
-        // Initiate tempMultiplicationValue as splitArrayAtStarOrDash[0] (to get an initial value for multiplication).
-        BigDecimal tempMultiplicationValue = new BigDecimal(splitArrayAtStar[0]);
-
-        // Cycle through the array split at '*' and calculate the product.
-        // Notice the loop starts at j=1 - that is because tempMultiplicationValue is set as splitArrayAtStar[0].
-        for (int j=1 ; j<splitArrayAtStar.length ; j++)
-        {
-
-            // Check if the value is a BigDecimal. If not, assume that it is because it contains "/" (dashes) and calculate the division.
-            if (!isBigDecimal(splitArrayAtStar[j]))
-            {
-                // Split the number at "/"
-                String [] splitArrayAtDash = splitArrayAtStar[j].split("/");
-
-                // Initiate temporary BigDecimal value as first array value.
-                BigDecimal tempDivisionValue = new BigDecimal(splitArrayAtDash[0]);
-
-                // Initiate the second value as a BigDecimal.
-                BigDecimal tempStringAsBigDecimal = new BigDecimal(splitArrayAtDash[1]);
-
-                // Do the division. As all the divisions are done as "1/x", there are always only two values here.
-                tempDivisionValue = tempDivisionValue.divide(tempStringAsBigDecimal, outputPrecision*100, BigDecimal.ROUND_HALF_UP);
-
-                // Put the value back in the splitArrayAtStar[j].
-                splitArrayAtStar[j] = tempDivisionValue.toPlainString();
-            }
-
-            // Turn the value at splitArrayAtStar[j] into a BigDecimal.
-            BigDecimal tempStringAsBigDecimal = new BigDecimal(splitArrayAtStar[j]);
-
-            // As the loops iterates, tempMultiplicationValue will be the product of the array values.
-            tempMultiplicationValue = tempMultiplicationValue.multiply(tempStringAsBigDecimal);
-        }
-
-        // Now the product of the splitArrayAtPlus-array value is calculated. Put it back into the array.
-        return tempMultiplicationValue.toPlainString();
+        return input.split("\\*");
     }
 
 
-    public static void main(String args[]) {
-
-        System.out.println(welcomeMsg);
-        initialiseArgumentsAndSetPrecision(args);
-
-        System.out.println("Precision is " + outputPrecision + " decimals.");
-
+    private static BigDecimal calculateNumericValue (String input) {
 
         // Parse the input string.
 
@@ -154,9 +103,9 @@ public class SimpleCalc {
         // Replace '-' with '+-' to be able to split the string at '+' for both subtraction and addition.
         // Afterwards, split the array at '+'
         // The result is an array with values to be added together.
-        String [] splitArrayAtPlus = splitStringAtPlusSigns(args[0]);
+        String [] splitArrayAtPlus = splitStringAtPlusSigns(input);
 
-        
+
         // 2:
         // Calculate the numeric value of each entry in the splitArrayAtPlus-array.
         // When all entries are numeric, the sum can be calculated.
@@ -171,20 +120,76 @@ public class SimpleCalc {
             // If it is not a BigDecimal (ie. a numeric value), try to calculate the numeric value.
 
             if ( !isBigDecimal(splitArrayAtPlus[i]) )
-                splitArrayAtPlus[i] = calculateNumericValue( splitArrayAtPlus[i] );
+                splitArrayAtPlus[i] = calculateNumericValueFromMultiplication(splitArrayAtPlus[i]);
         }
 
+        // Return the final sum
+        return calculateFinalResultFromStringArray(splitArrayAtPlus);
+    }
+    
+    private static String calculateNumericValueFromMultiplication (String input) {
+        // Input must be a string with only multiplication and division, f.x. "2*2+4*8/2"
+        // Output is a string with the calculated numeric value.
 
-        // Calculate the sum of all values in splitArrayAtPlus:
+        // Split the string at "*"
+        String [] splitArrayAtStar = splitStringAtMultiplicationSigns(input);
+
+        // Initiate tempMultiplicationValue as ONE (because of multiplication to come - 1*x1*x2*x3 ...)
+        BigDecimal tempMultiplicationValue = BigDecimal.ONE;
+
+        // Cycle through the array split at '*' and calculate the product.
+        for (int j=0 ; j<splitArrayAtStar.length ; j++)
+        {
+            // Check if the value is a BigDecimal.
+            // If not, assume that it is because it contains "/" (dashes) and calculate the division.
+            if (!isBigDecimal(splitArrayAtStar[j]))
+                splitArrayAtStar[j] = calculateNumericValueFromDivision( splitArrayAtStar[j] );
+
+            // As the loops iterates, tempMultiplicationValue will be the product of the array values.
+            tempMultiplicationValue = tempMultiplicationValue.multiply( toBigDecimal(splitArrayAtStar[j]) );
+        }
+
+        // Now the product of the splitArrayAtPlus-array value is calculated. Put it back into the array.
+        return tempMultiplicationValue.toPlainString();
+    }
+
+    private static String calculateNumericValueFromDivision (String input) {
+        // Input is a string containing "/", for example "5/2"
+        // Output is a rounded numeric value
+
+        // Split the number at "/"
+        String [] splitArrayAtDash = input.split("/");
+
+        // Do the division and return!
+        return toBigDecimal(splitArrayAtDash[0])
+                .divide( toBigDecimal(splitArrayAtDash[1]) , outputPrecision*100, BigDecimal.ROUND_HALF_UP)
+                .toPlainString();
+    }
+    
+    private static BigDecimal calculateFinalResultFromStringArray (String [] input) {
 
         BigDecimal finalSum = BigDecimal.ZERO;
 
-        for (int i = 0 ; i<splitArrayAtPlus.length ; i++)
-            finalSum = finalSum.add( toBigDecimal(splitArrayAtPlus[i]) );
+        for (int i = 0 ; i<input.length ; i++)
+            finalSum = finalSum.add( toBigDecimal(input[i]) );
 
         // Divide with one and round to outputPrecision to get the final result
-        finalSum = finalSum.divide(BigDecimal.ONE, outputPrecision, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
-        
+        return finalSum.divide(BigDecimal.ONE, outputPrecision, BigDecimal.ROUND_HALF_UP).stripTrailingZeros();
+
+    }
+
+
+    public static void main(String args[]) {
+
+        System.out.println(welcomeMsg);
+        initialiseArgumentsAndSetPrecision(args);
+
+        System.out.println("Precision is " + outputPrecision + " decimals.");
+
+
+         // Calculate the numeric value of args[0]:
+        BigDecimal finalSum = calculateNumericValue(args[0]);
+
         // Print the result.
         System.out.println(args[0] + " = " + finalSum.toPlainString());
 

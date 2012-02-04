@@ -9,6 +9,11 @@ Usage: "java SimpleCalc [math expression] (precision)"
 
 Changelog:
 
+Version 1.11:
+- bugfixes: 2/-2 and 2*-2 now work as they should.
+- error handling.
+- as usual: big code cleanup.
+
 Version 1.10:
 - completely new parser
 - new usage: "java SimpleCalc [math expression] (precision)"
