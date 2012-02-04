@@ -18,6 +18,7 @@ Version 1.10:
 - one bug persists: you can't use "/-" in the calculation, for example "2/-2" will crash. Use "-2/2" instead.
   I will fix it ASAP.
 - another limitation: no parenthesises are allowed yet, nor are sinus, pi, etc...
+- and last but not least: I need to fix the error handling of the code.
 
 Version 1.03:
 - usage: "java SimpleCalc number1 (+-*/) number2."

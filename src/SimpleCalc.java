@@ -1,19 +1,4 @@
-/**
- * Created by IntelliJ IDEA.
- * User: skovmand
- * Date: 28/01/12
- * Time: 12.10
- */
-
-/**
- * Created by IntelliJ IDEA.
- * User: skovmand
- * Date: 28/01/12
- * Time: 12.10
- */
-
 import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class SimpleCalc {
     
@@ -35,7 +20,7 @@ public class SimpleCalc {
         System.exit(errorCode);  
     }
 
-    private static void initialiseArgumentsAndSetPrecision(String[] args) {
+    private static void initialiseArgumentsAndSetPrecision(String [] args) {
         // Check for arguments.
         if (args.length < 1 || args[0].equals("?") || args[0].equals("--help"))
             fatalError("", 1);
@@ -45,45 +30,39 @@ public class SimpleCalc {
         else if(args.length > 1 && !isInteger(args[1]))
             fatalError("Invalid precision. Must be an integer.",1);
     }
-    
-    private static BigDecimal toBigDecimal(String num) throws NumberFormatException {
+
+
+    private static BigDecimal toBigDecimal(String num) {
         // Returns a BigDecimal from a String or handles a NumberFormatException.
         
         try {
             return new BigDecimal(num);
         } catch (NumberFormatException e) {
             fatalError("Invalid number '" + num + "'. Must be a numeric value. Use '.' for decimals.", 2);
+            return BigDecimal.ZERO; // is never called.
         }
-        
-        return BigDecimal.ZERO; // is never called.
     }
 
     private static boolean isBigDecimal(String num) {
-        // Test if a number is a BigDecimal.
-
-        BigDecimal testVariable = BigDecimal.ZERO;
+        // Test if a number is a BigDecimal. Return TRUE or FALSE.
 
         try {
-            testVariable = new BigDecimal(num);
+            BigDecimal testVariable = new BigDecimal(num);
+            return true;
         } catch (NumberFormatException e) {
             return false;
         }
-
-        return true;
     }
 
     private static boolean isInteger(String num) {
-        // Test if a number is an integer..
-
-        Integer testVariable = 0;
+        // Test if a number is an integer. Return TRUE or FALSE.
 
         try {
-            testVariable = new Integer(num);
+            Integer testVariable = new Integer(num);
+            return true;
         } catch (NumberFormatException e) {
             return false;
         }
-
-        return true;
     }
 
 
@@ -159,6 +138,7 @@ public class SimpleCalc {
         // Now the product of the splitArrayAtPlus-array value is calculated. Put it back into the array.
         return tempMultiplicationValue.toPlainString();
     }
+
 
     public static void main(String args[]) {
 
